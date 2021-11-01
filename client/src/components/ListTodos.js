@@ -37,10 +37,25 @@ const ListTodos = () => {
   }, []);
 
   useEffect(() => {
-    socket.on('new-todo', (newToDo) => {
+    socket.on('new_todo', (newToDo) => {
       setTodos([...todos, newToDo])
-    })
-  }, [socket, todos]);
+    });
+
+    socket.on('udpate_todo', (updatedToDo) => {
+      const updatedToDoList = todos.map((todo) => {
+        if (todo.todo_id === updatedToDo.todo_id) { 
+          return {...updatedToDo} 
+        } else {
+          return {...todo}
+        }
+      });
+      setTodos(updatedToDoList);
+    });
+
+    socket.on('delete_todo', (deletedToDo) => {
+      setTodos([...todos.filter((todo) => deletedToDo.todo_id !== todo.todo_id)])
+    });
+  }, [socket, setTodos, todos]);
 
   console.log(todos);
 
@@ -56,7 +71,7 @@ const ListTodos = () => {
         </thead>
         <tbody>
           {todos.map(todo => (
-            <tr key={todo.todo_id}>
+            <tr key={`${todo.todo_id}`}>
               <td>{todo.description}</td>
               <td>
                 <EditTodo todo={todo} />
